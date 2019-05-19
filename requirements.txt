@@ -1,0 +1,4 @@
+requests
+mendeley
+click
+tablib
