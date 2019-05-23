@@ -13,6 +13,7 @@ from dotenv import load_dotenv
 
 load_dotenv(Path('~').expanduser()/'.mendeley_cli'/'config')
 load_dotenv(Path()/'.mendeley_cli'/'config')
+
 tablib_formats = list(Dataset()._formats.keys())
 
 
@@ -55,8 +56,8 @@ def cmd():
     pass
 
 
-@cmd.group(name='list')
-def cmd_list():
+@cmd.group(name='get')
+def cmd_get():
     pass
 
 
@@ -94,20 +95,20 @@ def cmd_attach_file(document_title, document_uuid, file, file_title, print_forma
             logging.warning(e.message)
         else:
             raise
-    run_list_files(document_title, document_uuid, print_format, session)
+    run_get_files(document_title, document_uuid, print_format, session)
 
 
-@cmd_list.command(name='files')
+@cmd_get.command(name='files')
 @click.option('--document-title', type=str, default=None, help='Document title')
 @click.option('--document-uuid', type=click.UUID, default=None, help='Document UUID')
 @click.option('--print-format', type=click.Choice(tablib_formats), default=None, help='Print format')
-def cmd_list_files(document_title, document_uuid, print_format):
+def cmd_get_files(document_title, document_uuid, print_format):
     """List files"""
     session = get_session()
-    run_list_files(document_title, document_uuid, print_format, session)
+    run_get_files(document_title, document_uuid, print_format, session)
 
 
-def run_list_files(document_title, document_uuid, print_format, session):
+def run_get_files(document_title, document_uuid, print_format, session):
     documents = get_documents(session, document_title, document_uuid)
     dataset = Dataset(headers=['Document', 'UUID', 'Name'])
     for document in documents:
@@ -134,14 +135,14 @@ def cmd_delete_file(document_title, document_uuid, file_uuid, print_format):
     files = [_ for _ in documents[0].files.list().items if _.id == file_uuid]
     assert len(files) == 1, f'Found {len(files)} files for uuid {file_uuid}.'
     files[0].delete()
-    run_list_files(document_title, document_uuid, print_format, session)
+    run_get_files(document_title, document_uuid, print_format, session)
 
 
-@cmd_list.command(name='documents')
+@cmd_get.command(name='documents')
 @click.option('--document-title', type=str, default=None, help='Document title')
 @click.option('--document-uuid', type=click.UUID, default=None, help='Document UUID')
 @click.option('--print-format', type=click.Choice(tablib_formats+['bibtex']), default=None, help='Print format')
-def cmd_list_documents(document_title, document_uuid, print_format):
+def cmd_get_documents(document_title, document_uuid, print_format):
     """List documents"""
     session = get_session()
     documents = get_documents(session, document_title, document_uuid)
