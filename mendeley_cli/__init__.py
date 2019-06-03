@@ -110,13 +110,14 @@ def cmd_get_files(document_title, document_uuid, print_format):
 
 def run_get_files(document_title, document_uuid, print_format, session):
     documents = get_documents(session, document_title, document_uuid)
-    dataset = Dataset(headers=['Document', 'UUID', 'Name'])
+    dataset = Dataset(headers=['Document Title', 'File UUID', 'File Name', 'URL'])
     for document in documents:
         for file in document.files.list().items:
             dataset.append([
                 document.title,
                 file.id,
-                file.file_name
+                file.file_name,
+                f'https://www.mendeley.com/viewer/?fileId={file.id}&documentId={document.id}'
             ])
     print_table(dataset, print_format)
 
