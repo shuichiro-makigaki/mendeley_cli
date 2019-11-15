@@ -2,10 +2,17 @@ from pathlib import Path
 import shutil
 import logging
 import os
+import http
+import http.server
+import webbrowser
+import base64
+from urllib import parse
+import json
 
-import requests
-from mendeley import Mendeley
-from mendeley.exception import MendeleyApiException
+from mendeley import Mendeley, MendeleyAuthorizationCodeAuthenticator
+from mendeley.session import MendeleySession
+from mendeley.auth import MendeleyAuthorizationCodeTokenRefresher
+from mendeley.exception import MendeleyApiException, MendeleyException
 import click
 from tablib import Dataset
 from dotenv import load_dotenv
@@ -14,15 +21,55 @@ from dotenv import load_dotenv
 load_dotenv(Path('~').expanduser()/'.mendeley_cli'/'config')
 load_dotenv(Path()/'.mendeley_cli'/'config')
 
+logging.basicConfig(level=logging.INFO)
+
 tablib_formats = list(Dataset()._formats.keys())
+
+mendeley_client = Mendeley(int(os.getenv('MENDELEY_CLIENT_ID')),
+                           os.getenv('MENDELEY_CLIENT_SECRET'),
+                           redirect_uri=os.getenv('MENDELEY_REDIRECT_URI'))
+mendeley_token_b64 = os.getenv('MENDELEY_OAUTH2_TOKEN_BASE64', None)
+
+callback_html = '''
+<html>
+<head>
+  <title>Mendeley CLI</title>
+</head>
+<body>
+Login succeeded. You can close this window or tab.<br />
+Please follow messages in terminal to save your token.
+</body>
+</html>
+'''.encode()
+
+
+class RH(http.server.BaseHTTPRequestHandler):
+    def do_GET(self):
+        query = parse.parse_qs(parse.urlparse(self.path).query)
+        auth = mendeley_client.start_authorization_code_flow(query['state'][0])
+        mendeley_session = auth.authenticate(f'{mendeley_client.redirect_uri}{self.path}')
+        mendeley_token = json.dumps(mendeley_session.token)
+        mendeley_token_b64 = base64.b64encode(mendeley_token.encode()).decode()
+        self.send_response(http.HTTPStatus.OK)
+        self.send_header('Content-type', 'text/html; charset=utf-8')
+        self.end_headers()
+        self.wfile.write(callback_html)
+        print('Login succeeded.')
+        print('Please set a environment variable MENDELEY_OAUTH2_TOKEN_BASE64, or add it to config file:')
+        print()
+        print(f'MENDELEY_OAUTH2_TOKEN_BASE64={mendeley_token_b64}')
+        print()
 
 
 def get_session():
-    auth = Mendeley(int(os.getenv('MENDELEY_CLIENT_ID')),
-                    redirect_uri=os.getenv('MENDELEY_REDIRECT_URI')).start_implicit_grant_flow()
-    res = requests.post(auth.get_login_url(), allow_redirects=False,
-                        data={'username': os.getenv('MENDELEY_USERNAME'), 'password': os.getenv('MENDELEY_PASSWORD')})
-    return auth.authenticate(res.headers['Location'])
+    if mendeley_token_b64 is None:
+        raise MendeleyException('Login required. Please `mendeley get token` first.')
+    else:
+        mendeley_token = json.loads(base64.b64decode(mendeley_token_b64.encode()).decode())
+        auth = MendeleyAuthorizationCodeAuthenticator(mendeley_client, None)
+        mendeley_session = MendeleySession(auth.mendeley, token=mendeley_token, client=auth.client,
+                                           refresher=MendeleyAuthorizationCodeTokenRefresher(auth))
+    return mendeley_session
 
 
 def get_documents(session, document_title=None, document_uuid=None):
@@ -45,11 +92,11 @@ def print_table(dataset: Dataset, print_format):
 def cmd():
     """Required environemnt variables
 
-    * MENDELEY_USERNAME
-
-    * MENDELEY_PASSWORD
-
     * MENDELEY_CLIENT_ID
+
+    * MENDELEY_CLIENT_SECRET
+
+    * MENDELEY_TOKEN
 
     * MENDELEY_REDIRECT_URI
     """
@@ -69,6 +116,14 @@ def cmd_attach():
 @cmd.group(name='delete')
 def cmd_delete():
     pass
+
+
+@cmd_get.command(name='token')
+def cmd_get_token():
+    """Login and get token"""
+    webbrowser.open(mendeley_client.start_authorization_code_flow().get_login_url())
+    netloc = parse.urlparse(mendeley_client.redirect_uri)
+    http.server.HTTPServer((netloc.hostname, netloc.port), RH).handle_request()
 
 
 @cmd_attach.command(name='file')
