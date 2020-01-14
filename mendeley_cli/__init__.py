@@ -14,7 +14,7 @@ from mendeley.session import MendeleySession
 from mendeley.auth import MendeleyAuthorizationCodeTokenRefresher
 from mendeley.exception import MendeleyApiException, MendeleyException
 import click
-from tablib import Dataset
+from tablib import formats, Dataset
 from dotenv import load_dotenv
 
 
@@ -23,7 +23,7 @@ load_dotenv(Path()/'.mendeley_cli'/'config')
 
 logging.basicConfig(level=logging.INFO)
 
-tablib_formats = list(Dataset()._formats.keys())
+tablib_formats = list(formats.registry._formats.keys())
 
 mendeley_client = Mendeley(int(os.getenv('MENDELEY_CLIENT_ID')),
                            os.getenv('MENDELEY_CLIENT_SECRET'),
