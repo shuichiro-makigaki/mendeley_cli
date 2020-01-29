@@ -63,7 +63,7 @@ class RH(http.server.BaseHTTPRequestHandler):
 
 def get_session():
     if mendeley_token_b64 is None:
-        raise MendeleyException('Login required. Please `mendeley get token` first.')
+        raise MendeleyException('Login required. Please `mendeley.py get token` first.')
     else:
         mendeley_token = json.loads(base64.b64decode(mendeley_token_b64.encode()).decode())
         auth = MendeleyAuthorizationCodeAuthenticator(mendeley_client, None)
