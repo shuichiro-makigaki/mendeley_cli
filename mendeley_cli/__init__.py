@@ -99,9 +99,10 @@ def cmd():
 
     * MENDELEY_CLIENT_SECRET
 
-    * MENDELEY_TOKEN
-
     * MENDELEY_REDIRECT_URI
+
+    * MENDELEY_OAUTH2_TOKEN_BASE64
+
     """
     pass
 

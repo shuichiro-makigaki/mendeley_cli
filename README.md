@@ -1,18 +1,24 @@
-# mendeley_cli
+# mendeley-cli
 CLI for Mendeley
 
 # Install
 
 ```
-pip install mendeley_cli
+pip install mendeley-cli
+```
+
+Docker image is also available.
+
+```
+docker image pull makisyu/mendeley
 ```
 
 # How to get Mendeley API token
 
 To create, update, and delete resources in your Mendeley library via Mendeley API, OAUTH2 flow is required.
-We have to register and mark this mendeley_cli as a trusted application in your Mendeley (Elsevier) account by yourself.
+We have to register and mark this mendeley-cli as a trusted application in your Mendeley (Elsevier) account by yourself.
 
-## 1. Register mendeley_cli as a trusted app
+## 1. Register mendeley-cli as a trusted app
 
 https://dev.mendeley.com/myapps.html
 
@@ -22,9 +28,9 @@ Register a new app (if not exists)
 
 All fields are required.
 
-* **Application name** MendeleyCLI
-* **Description** MendeleyCLI
-* **RegirectURL** http://localhost:8888
+* **Application name**: MendeleyCLI
+* **Description**: MendeleyCLI
+* **RegirectURL**: http://localhost:8888
   * Port number is a variable; >1024 is recommended.
 * Generate secret, and save it securely.
 * Submit

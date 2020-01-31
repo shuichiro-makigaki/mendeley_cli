@@ -2,8 +2,8 @@ from pathlib import Path
 from setuptools import setup, find_packages
 
 setup(
-    name='mendeley_cli',
-    version='0.1.1',
+    name='mendeley-cli',
+    version='0.1.2',
     packages=find_packages(),
     include_package_data=True,
     install_requires=Path('requirements.txt').read_text().splitlines(),
