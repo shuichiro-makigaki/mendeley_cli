@@ -37,7 +37,7 @@ callback_html = '''
 </head>
 <body>
 Login succeeded. You can close this window or tab.<br />
-Please follow messages in terminal to save your token.
+Please follow messages in the terminal to save your token.
 </body>
 </html>
 '''.encode()
@@ -55,7 +55,7 @@ class RH(http.server.BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(callback_html)
         print('Login succeeded.')
-        print('Please set a environment variable MENDELEY_OAUTH2_TOKEN_BASE64 or add it to config file:')
+        print('Please set an environment variable MENDELEY_OAUTH2_TOKEN_BASE64 or add it to a config file:')
         print()
         print(f'MENDELEY_OAUTH2_TOKEN_BASE64={mendeley_token_b64}')
         print()
