@@ -3,9 +3,10 @@ from setuptools import setup, find_packages
 
 setup(
     name='mendeley_cli',
-    version='0.1.0',
+    version='0.1.1',
     packages=find_packages(),
     include_package_data=True,
+    install_requires=Path('requirements.txt').read_text().splitlines(),
     url='https://github.com/shuichiro-makigaki/mendeley_cli',
     license='MIT',
     author='Shuichiro MAKIGAKI',
