@@ -9,8 +9,8 @@ pip install mendeley_cli
 
 # How to get Mendeley API token
 
-To create, update and delete resources in your Mendeley library via Mendeley API, OAUTH2 flow is required.
-We have to register and mark this mendeley_cli as a trusted application in your mendeley (Elsevier) account by yourself.
+To create, update, and delete resources in your Mendeley library via Mendeley API, OAUTH2 flow is required.
+We have to register and mark this mendeley_cli as a trusted application in your Mendeley (Elsevier) account by yourself.
 
 ## 1. Register mendeley_cli as a trusted app
 
@@ -33,31 +33,31 @@ You got Client ID, Client Secret and Redirect URL.
 
 ## 2. Generate OAUTH2 token
 
-In terminal, with setting the parameters by environment variables, get token by `mendeley get token`:
+In a terminal, with setting the parameters by environment variables, get token by `mendeley get token`:
 
 ```
 MENDELEY_CLIENT_ID=<...> MENDELEY_CLIENT_SECRET=<...> MENDELEY_REDIRECT_URI=<...> mendeley get token
 ```
 
-Automatically open web browser, shows Mendeley login page, and login.
+Automatically web browser opens and shows the login page, and please login.
 
-Then, following messages will show:
+Then, the following messages show:
 
 ```
 Login succeeded. You can close this window or tab.
-Please follow messages in terminal to save your token.
+Please follow messages in the terminal to save your token.
 ```
 
-Also, following messages shows in terminal:
+Also, the following messages show in the terminal:
 
 ```
 Login succeeded.
-Please set a environment variable MENDELEY_OAUTH2_TOKEN_BASE64, or add it to config file:
+Please set an environment variable MENDELEY_OAUTH2_TOKEN_BASE64, or add it to a config file:
 
 MENDELEY_OAUTH2_TOKEN_BASE64=<...>
 ```
 
-Now, all parameters to run mendeley_cli is retrived.
+Now, all parameters to run mendeley_cli is retrieved.
 
 ## 3. Configure mendeley_cli
 
@@ -71,7 +71,7 @@ MENDELEY_OAUTH2_TOKEN_BASE64=<...>
 ```
 
 The configuration file must be `~/.mendeley_cli/config` or `<pwd>/.mendeley_cli/config`.
-Alternatively, they can be specified by environment varialbes directly.
+Alternatively, they can be specified by environment variables directly.
 
 ## 4. All set!
 
