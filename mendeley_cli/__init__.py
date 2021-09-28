@@ -21,7 +21,7 @@ from dotenv import load_dotenv
 load_dotenv(Path('~').expanduser()/'.mendeley_cli'/'config')
 load_dotenv(Path()/'.mendeley_cli'/'config')
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.ERROR)
 
 tablib_formats = list(formats.registry._formats.keys())
 
@@ -77,18 +77,18 @@ def get_documents(session, document_title=None, document_uuid=None, group_uuid=N
     if group_uuid is not None:
         documents.group_id = str(group_uuid)
     if document_title is None and document_uuid is None:
-        return documents.list().items
+        return list(documents.iter())
     if document_uuid is None:
-        return documents.advanced_search(title=document_title).list().items
+        return list(documents.advanced_search(title=document_title).iter())
     else:
         return [documents.get(document_uuid)]
 
 
 def print_table(dataset: Dataset, print_format):
-    if print_format is None:
-        print(dataset)
-    else:
-        print(dataset.export(print_format))
+    fmt = print_format
+    if fmt is None:
+        fmt = 'cli'
+    print(dataset.export(fmt, tablefmt='simple'))
 
 
 @click.group(context_settings={'max_content_width': 120})
