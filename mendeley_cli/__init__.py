@@ -16,6 +16,7 @@ from mendeley.exception import MendeleyApiException, MendeleyException
 import click
 from tablib import formats, Dataset
 from dotenv import load_dotenv
+from diskcache import Cache
 
 
 load_dotenv(Path('~').expanduser()/'.mendeley_cli'/'config')
@@ -41,6 +42,8 @@ Please follow messages in the terminal to save your token.
 </body>
 </html>
 '''.encode()
+
+cache = Cache()
 
 
 class RH(http.server.BaseHTTPRequestHandler):
@@ -71,13 +74,17 @@ def get_session():
                                            refresher=MendeleyAuthorizationCodeTokenRefresher(auth))
     return mendeley_session
 
+@cache.memoize(expire=60*60*6)
+def get_all_documents(documents):
+    return list(documents.iter(1))
+
 
 def get_documents(session, document_title=None, document_uuid=None, group_uuid=None):
     documents = session.documents
     if group_uuid is not None:
         documents.group_id = str(group_uuid)
     if document_title is None and document_uuid is None:
-        return list(documents.iter())
+        return get_all_documents(documents)
     if document_uuid is None:
         return list(documents.advanced_search(title=document_title).iter())
     else:

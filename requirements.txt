@@ -3,3 +3,4 @@ mendeley
 click
 tablib[all]
 python-dotenv
+diskcache
