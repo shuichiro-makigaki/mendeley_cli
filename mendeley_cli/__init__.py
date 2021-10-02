@@ -88,7 +88,10 @@ def print_table(dataset: Dataset, print_format):
     fmt = print_format
     if fmt is None:
         fmt = 'cli'
-    print(dataset.export(fmt, tablefmt='simple'))
+    if fmt == 'cli':
+        print(dataset.export(fmt, tablefmt='simple'))
+    else:
+        print(dataset.export(fmt))
 
 
 @click.group(context_settings={'max_content_width': 120})
