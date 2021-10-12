@@ -1,5 +1,5 @@
 requests
-mendeley
+yandeley
 click
 tablib[all]
 python-dotenv

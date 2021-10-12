@@ -9,10 +9,10 @@ import base64
 from urllib import parse
 import json
 
-from mendeley import Mendeley, MendeleyAuthorizationCodeAuthenticator
-from mendeley.session import MendeleySession
-from mendeley.auth import MendeleyAuthorizationCodeTokenRefresher
-from mendeley.exception import MendeleyApiException, MendeleyException
+from yandeley import Mendeley, MendeleyAuthorizationCodeAuthenticator
+from yandeley.session import MendeleySession
+from yandeley.auth import MendeleyAuthorizationCodeTokenRefresher
+from yandeley.exception import MendeleyApiException, MendeleyException
 import click
 from tablib import formats, Dataset
 from dotenv import load_dotenv
@@ -244,6 +244,23 @@ def cmd_get_groups(print_format):
     dataset = Dataset(headers=['UUID', 'Type', 'Name'])
     for group in groups:
         dataset.append([group.id, group.access_level, group.name])
+    print_table(dataset, print_format)
+
+
+# @cmd_get.command(name='annotations')
+# @click.option('--document-uuid', type=click.UUID, help='Document UUID')
+# @click.option('--print-format', type=click.Choice(tablib_formats), help='Print format')
+def cmd_get_annotations(document_uuid, group_uuid, print_format):
+    """Get annotations"""
+    annotations = list(get_session().annotations.iter())
+    dataset = Dataset(headers=['UUID', 'Color', 'created', 'Type', 'document', 'last_modified', 'positions', 'privacy_level', 'profile', 'text'])
+    for annot in annotations:
+        dataset.append([
+            annot.id,
+            [annot.color.r, annot.color.g, annot.color.b],
+            annot.created, annot.type, annot.document().id, annot.last_modified,
+            [[(int(_.top_left.x), int(_.top_left.y)), (int(_.bottom_right.x), int(_.bottom_right.y), _.page)] for _ in annot.positions],
+            annot.privacy_level, annot.profile.id, annot.text])
     print_table(dataset, print_format)
 
 
