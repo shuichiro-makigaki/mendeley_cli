@@ -16,6 +16,7 @@ from yandeley.exception import MendeleyApiException, MendeleyException
 import click
 from tablib import formats, Dataset
 from dotenv import load_dotenv
+from colr import color
 
 
 load_dotenv(Path('~').expanduser()/'.mendeley_cli'/'config')
@@ -247,20 +248,47 @@ def cmd_get_groups(print_format):
     print_table(dataset, print_format)
 
 
-# @cmd_get.command(name='annotations')
-# @click.option('--document-uuid', type=click.UUID, help='Document UUID')
-# @click.option('--print-format', type=click.Choice(tablib_formats), help='Print format')
+@cmd_get.command(name='annotations')
+@click.option('--document-uuid', type=click.UUID, help='Document UUID')
+@click.option('--group-uuid', type=click.UUID, help='Group UUID')
+@click.option('--print-format', type=click.Choice(tablib_formats), help='Print format')
 def cmd_get_annotations(document_uuid, group_uuid, print_format):
     """Get annotations"""
-    annotations = list(get_session().annotations.iter())
-    dataset = Dataset(headers=['UUID', 'Color', 'created', 'Type', 'document', 'last_modified', 'positions', 'privacy_level', 'profile', 'text'])
-    for annot in annotations:
-        dataset.append([
-            annot.id,
-            [annot.color.r, annot.color.g, annot.color.b],
-            annot.created, annot.type, annot.document().id, annot.last_modified,
-            [[(int(_.top_left.x), int(_.top_left.y)), (int(_.bottom_right.x), int(_.bottom_right.y), _.page)] for _ in annot.positions],
-            annot.privacy_level, annot.profile.id, annot.text])
+    annotations = list(get_session().annotations.iter(document_id=document_uuid, group_id=group_uuid))
+    if print_format is None or print_format == 'cli':
+        dataset = Dataset(headers=['UUID', 'Type', 'Text', 'Pages', 'Document UUID'])
+        for annot in annotations:
+            dataset.append([
+                annot.id,
+                annot.type,
+                color('None' if annot.text is None else annot.text, fore=(annot.color.r, annot.color.g, annot.color.b)),
+                list(set([_.page for _ in annot.positions])),
+                annot.document().id
+            ])
+    else:
+        dataset = Dataset(headers=['UUID', 'Type', 'Color', 'Text', 'Posisions', 'Document UUID', 'Created', 'Last modified', 'Privacy level', 'Profile'])
+        for annot in annotations:
+            dataset.append([
+                annot.id,
+                annot.type,
+                {'R': annot.color.r, 'G': annot.color.g, 'B': annot.color.b},
+                annot.text,
+                [
+                    {
+                        'page': _.page,
+                        'posision': {
+                            'top_left': (int(_.top_left.x), int(_.top_left.y)),
+                            'bottom_right': (int(_.bottom_right.x), int(_.bottom_right.y))
+                        }
+                    }
+                    for _ in annot.positions
+                ],
+                annot.document().id,
+                str(annot.created),
+                str(annot.last_modified),
+                annot.privacy_level,
+                annot.profile.id
+            ])
     print_table(dataset, print_format)
 
 

@@ -3,3 +3,4 @@ yandeley
 click
 tablib[all]
 python-dotenv
+colr
